@@ -138,6 +138,6 @@ services:
     ports:
       - '8081:80'
   
-  volumes:
-    db-data:
-    substrate-data:
+volumes:
+  db-data:
+  substrate-data:
