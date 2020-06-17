@@ -61,8 +61,18 @@ docker-compose -p kusama -f docker-compose.kusama-full.yml up --build
 
 ## Links to applications
 * Polkascan Explorer GUI: http://127.0.0.1:8080
+* Monitor harvester progress: http://127.0.0.1:8080/kusama/harvester/admin
 * Harvester Task Monitor: http://127.0.0.1:5555
 * Polkadot JS Apps: http://127.0.0.1:8081
+
+## Other networks
+
+* Polkadot CC1: Use `docker-compose.polkadot-cc1-quick.yml` and `docker-compose.polkadot-cc1-full.yml`
+
+## Custom network
+
+* Modify `docker-compose.custom.yml` according to the specification of the custom chain
+* Modify `harvester/app/type_registry/custom_types.json` to match the introduced types of the custom chain 
 
 ## Cleanup Docker
 Use the following commands with caution to cleanup your Docker environment.

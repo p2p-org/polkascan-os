@@ -17,18 +17,19 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_NAME=polkascan
-      - SUBSTRATE_RPC_URL=http://substrate-node:9933/
-      - SUBSTRATE_ADDRESS_TYPE=2
-      - TYPE_REGISTRY=kusama
+      - SUBSTRATE_RPC_URL=http://host.docker.internal:9933/
+      - SUBSTRATE_ADDRESS_TYPE=42
+      - TYPE_REGISTRY_FILE=app/type_registry/substrate-node-template.json
       - SUBSTRATE_METADATA_VERSION=9
     depends_on:
       - mysql
-      - substrate-node
 
   harvester-api:
     build: harvester/.
     image: polkascan/pre-harvester:latest
     hostname: harvester-api
+    ports:
+      - '8001:8000'
     volumes:
       - './harvester:/usr/src/app'
     command: ./start.sh
@@ -42,17 +43,16 @@ services:
       - DB_USERNAME=root
       - DB_PASSWORD=root
       - DB_NAME=polkascan
-      - SUBSTRATE_RPC_URL=http://substrate-node:9933/
-      - TYPE_REGISTRY=kusama
-      - SUBSTRATE_ADDRESS_TYPE=2
+      - SUBSTRATE_RPC_URL=http://host.docker.internal:9933/
+      - TYPE_REGISTRY_FILE=app/type_registry/substrate-node-template.json
+      - SUBSTRATE_ADDRESS_TYPE=42
       - SUBSTRATE_METADATA_VERSION=9
-      - BALANCE_SYSTEM_ACCOUNT_MIN_BLOCK=1375086
       - NEW_SESSION_EVENT_HANDLER=True
-      - FINALIZATION_ONLY=1
+      - SUBSTRATE_STORAGE_BALANCE=Account
+      - SUBSTRATE_STORAGE_INDICES=Accounts
     depends_on:
       - redis
       - mysql
-      - substrate-node
 
   harvester-worker:
     build: harvester/.
@@ -100,29 +100,18 @@ services:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_DATABASE=polkascan
 
-  substrate-node:
-    image: polkasource/substrate-client:kusama-latest
-    hostname: substrate-node
-    volumes:
-      - 'substrate-data:/data'
-    ports:
-      - '30333:30333'
-      - '9933:9933'
-      - '9944:9944'
-    command: --chain=kusama --db-cache=2048 --wasm-execution=Compiled --rpc-external --rpc-cors=all --ws-external --rpc-methods=Unsafe --pruning=archive
-
   explorer-gui:
     image: polkascan/pre-explorer-gui:latest
     build:
       context: explorer-gui/.
       args:
-        NETWORK_NAME: Kusama
-        NETWORK_ID: kusama
+        NETWORK_NAME: Substrate Node Template
+        NETWORK_ID: template
         NETWORK_TYPE: pre
-        CHAIN_TYPE: relay
-        NETWORK_TOKEN_SYMBOL: KSM
+        CHAIN_TYPE: para
+        NETWORK_TOKEN_SYMBOL: DEV
         NETWORK_TOKEN_DECIMALS: 12
-        NETWORK_COLOR_CODE: 000000
+        NETWORK_COLOR_CODE: 777777
         API_URL: http://127.0.0.1:8080/api/v1
     ports:
       - '8080:80'
@@ -137,4 +126,3 @@ services:
 
 volumes:
   db-data:
-  substrate-data:
