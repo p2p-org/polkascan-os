@@ -103,40 +103,40 @@ services:
       - MYSQL_ROOT_PASSWORD=${POLKASCAN_DB_PASSWORD}
       - MYSQL_DATABASE=polkascan
 
-    substrate-node:
-      image: polkasource/substrate-client:kusama-latest
-      hostname: substrate-node
-      volumes:
-        - 'substrate-data:/data'
-      ports:
-        - '30333:30333'
-        - '9933:9933'
-        - '9944:9944'
-      command: --chain=kusama --db-cache=2048 --wasm-execution=Compiled --rpc-external --rpc-cors=all --ws-external --rpc-methods=Unsafe --pruning=archive
-  
-    explorer-gui:
-      image: polkascan/pre-explorer-gui:latest
-      build:
-        context: explorer-gui/.
-        args:
-          NETWORK_NAME: Kusama
-          NETWORK_ID: kusama
-          NETWORK_TYPE: pre
-          CHAIN_TYPE: relay
-          NETWORK_TOKEN_SYMBOL: KSM
-          NETWORK_TOKEN_DECIMALS: 12
-          NETWORK_COLOR_CODE: 000000
-          API_URL: /api/v1
-      ports:
-        - '8080:80'
-      depends_on:
-        - harvester-api
-        - explorer-api
-  
-    polkadot-ui:
-      image: polkasource/substrate-ui:polkadot-latest
-      ports:
-        - '8081:80'
+  substrate-node:
+    image: polkasource/substrate-client:kusama-latest
+    hostname: substrate-node
+    volumes:
+      - 'substrate-data:/data'
+    ports:
+      - '30333:30333'
+      - '9933:9933'
+      - '9944:9944'
+    command: --chain=kusama --db-cache=2048 --wasm-execution=Compiled --rpc-external --rpc-cors=all --ws-external --rpc-methods=Unsafe --pruning=archive
+
+  explorer-gui:
+    image: polkascan/pre-explorer-gui:latest
+    build:
+      context: explorer-gui/.
+      args:
+        NETWORK_NAME: Kusama
+        NETWORK_ID: kusama
+        NETWORK_TYPE: pre
+        CHAIN_TYPE: relay
+        NETWORK_TOKEN_SYMBOL: KSM
+        NETWORK_TOKEN_DECIMALS: 12
+        NETWORK_COLOR_CODE: 000000
+        API_URL: /api/v1
+    ports:
+      - '8080:80'
+    depends_on:
+      - harvester-api
+      - explorer-api
+
+  polkadot-ui:
+    image: polkasource/substrate-ui:polkadot-latest
+    ports:
+      - '8081:80'
   
   volumes:
     db-data:
