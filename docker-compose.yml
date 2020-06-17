@@ -18,13 +18,12 @@ services:
       - DB_PASSWORD=${POLKASCAN_DB_PASSWORD}
       - DB_NAME=polkascan
       - SUBSTRATE_RPC_URL=http://${SUBSTRATE_NODE_HOST}:9933/
-      - SUBSTRATE_ADDRESS_TYPE=0
-      - TYPE_REGISTRY=polkadot
+      - SUBSTRATE_ADDRESS_TYPE=2
+      - TYPE_REGISTRY=kusama
       - SUBSTRATE_METADATA_VERSION=9
-      - SUBSTRATE_STORAGE_BALANCE=Account
-      - SUBSTRATE_STORAGE_INDICES=Accounts
     depends_on:
       - mysql
+      - substrate-node
 
   harvester-api:
     build: harvester/.
@@ -46,17 +45,17 @@ services:
       - DB_PASSWORD=${POLKASCAN_DB_PASSWORD}
       - DB_NAME=polkascan
       - SUBSTRATE_RPC_URL=http://${SUBSTRATE_NODE_HOST}:9933/
-      - TYPE_REGISTRY=polkadot
-      - SUBSTRATE_ADDRESS_TYPE=0
+      - TYPE_REGISTRY=kusama 
+      - SUBSTRATE_ADDRESS_TYPE=2
       - SUBSTRATE_METADATA_VERSION=9
+      - BALANCE_SYSTEM_ACCOUNT_MIN_BLOCK=1375086
       - NEW_SESSION_EVENT_HANDLER=True
-      - SUBSTRATE_STORAGE_BALANCE=Account
-      - SUBSTRATE_STORAGE_INDICES=Accounts
       - FINALIZATION_ONLY=1
 
     depends_on:
       - redis
       - mysql
+      - substrate-node
 
   harvester-worker:
     build: harvester/.
@@ -104,29 +103,41 @@ services:
       - MYSQL_ROOT_PASSWORD=${POLKASCAN_DB_PASSWORD}
       - MYSQL_DATABASE=polkascan
 
-  explorer-gui:
-    image: polkascan/pre-explorer-gui:latest
-    build:
-      context: explorer-gui/.
-      args:
-        NETWORK_NAME: Polkadot CC1
-        NETWORK_ID: polkadot-cc1
-        NETWORK_TYPE: pre
-        CHAIN_TYPE: relay
-        NETWORK_TOKEN_SYMBOL: DOT
-        NETWORK_TOKEN_DECIMALS: 12
-        NETWORK_COLOR_CODE: e6007a
-        API_URL: /api/v1
-    ports:
-      - '8080:80'
-    depends_on:
-      - harvester-api
-      - explorer-api
-
-  polkadot-ui:
-    image: polkasource/substrate-ui:polkadot-latest
-    ports:
-      - '8081:80'
-
-volumes:
-  db-data:
+    substrate-node:
+      image: polkasource/substrate-client:kusama-latest
+      hostname: substrate-node
+      volumes:
+        - 'substrate-data:/data'
+      ports:
+        - '30333:30333'
+        - '9933:9933'
+        - '9944:9944'
+      command: --chain=kusama --db-cache=2048 --wasm-execution=Compiled --rpc-external --rpc-cors=all --ws-external --rpc-methods=Unsafe --pruning=archive
+  
+    explorer-gui:
+      image: polkascan/pre-explorer-gui:latest
+      build:
+        context: explorer-gui/.
+        args:
+          NETWORK_NAME: Kusama
+          NETWORK_ID: kusama
+          NETWORK_TYPE: pre
+          CHAIN_TYPE: relay
+          NETWORK_TOKEN_SYMBOL: KSM
+          NETWORK_TOKEN_DECIMALS: 12
+          NETWORK_COLOR_CODE: 000000
+          API_URL: /api/v1
+      ports:
+        - '8080:80'
+      depends_on:
+        - harvester-api
+        - explorer-api
+  
+    polkadot-ui:
+      image: polkasource/substrate-ui:polkadot-latest
+      ports:
+        - '8081:80'
+  
+  volumes:
+    db-data:
+    substrate-data:
